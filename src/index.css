@@ -5,9 +5,23 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: #FFC007;
+  font-weight: 700;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+a {
+  color: #FFC007;
+}
+
+a:hover {
+  color: #FFC007;
+}
+
+button {
+  color: orange;
 }
