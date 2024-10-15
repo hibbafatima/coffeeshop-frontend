@@ -1,7 +1,7 @@
 import './App.css';
 import { fetchItems, saveOrder, createUser, fetchLocations, API_URL } from './service/api';
 import { useState, useEffect } from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 function App() {
@@ -17,6 +17,7 @@ function App() {
     return savedOrder ? JSON.parse(savedOrder) : [];
   });
   const navigate = useNavigate();
+  const [itemCounters, setItemCounters] = useState({});
 
   useEffect(() => {
     const getItems = async () => {
@@ -78,46 +79,71 @@ function App() {
     setShow(false);
   };
 
+  const incrementCounter = (id) => {
+    setItemCounters((prev) => ({
+      ...prev,
+      [id]: (prev[id] || 0) + 1
+    }));
+  };
+
+  const decrementCounter = (id) => {
+    setItemCounters((prev) => ({
+      ...prev,
+      [id]: prev[id] > 0 ? prev[id] - 1 : 0
+    }));
+  };
+
   return (
     <main>
       <section className='mt-5'>
-        <div className="container d-flex justify-content-between align-items-center">
+        <Container className='d-flex justify-content-between align-items-center'>
           <div>
             <h1 className="title fw-bolder">Hi, {user ? user.name : 'Guest'}</h1>
             <h3 className="title fw-bolder">What will you have today...?</h3>
           </div>
-          <button className="btn btn-warning" onClick={() => handleCompleteOrder()}>Complete Order</button>
-        </div>
+          <Button variant="warning" onClick={handleCompleteOrder}>Complete Order</Button>
+        </Container>
       </section>
 
       <section className='mt-5'>
-        <div className="container">
-          <div className="row g-4">
+        <Container>
+          <Row className='g-4'>
             {items.length > 0 ? (
               items.map((item) => (
-                <div className="col-md-4 col-sm-6" key={item.id}>
-                  <div className="card-deck">
-                    <div className="card">
-                      <img class="card-img-top" src="/esspreso.jpeg" alt="Card image cap" style={{ width: '100%', height: '50%' }}></img>
-                      <div className="card-header d-flex justify-content-between align-items-center bg-dark fw-bolder text-warning">
-                        <span>{item.name}</span>
-                        <span>${item.price}</span>
-                      </div>
-                      <div className="card-body d-flex justify-content-between align-items-start">
-                        <p className="card-text me-auto">{item.description}</p>
-                        <button className="btn btn-warning ms-3" onClick={() => addToOrder(item)}>
+                <Col md={4} sm={6} key={item.id}>
+                  <Card className="h-100">
+                    <Card.Img variant="top" src="/esspreso.jpeg" alt="Card image cap" style={{ objectFit: 'cover', height: '200px' }} />
+                    <Card.Header className="d-flex justify-content-between align-items-center bg-dark fw-bolder text-warning">
+                      <span>{item.name}</span>
+                      <span>${item.price}</span>
+                    </Card.Header>
+                    <Card.Body className="d-flex flex-column justify-content-between">
+                      <p className="card-text">{item.description}</p>
+                      <div className="d-flex align-items-center">
+                        <Button variant="outline-warning" onClick={() => decrementCounter(item.id)}>-</Button>
+                        <input
+                          type="number"
+                          className="form-control mx-1 text-center"
+                          value={itemCounters[item.id] || 0}
+                          readOnly
+                          style={{ width: '50px' }}
+                        />
+                        <Button variant="outline-warning" onClick={() => incrementCounter(item.id)}>+</Button>
+                        <Button variant="warning" className="ms-3" onClick={() => addToOrder(item)}>
                           <i className="bi bi-cart"></i>
-                        </button>
+                        </Button>
                       </div>
-                    </div>
-                  </div>
-                </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
               ))
             ) : (
-              <p className="text-center">No items available</p> // Centered message for no items
+              <Col>
+                <p className="text-center">No items available</p>
+              </Col>
             )}
-          </div>
-        </div>
+          </Row>
+        </Container>
       </section>
 
       <Modal show={show} onHide={handleModalClose} backdrop="static"> 
@@ -158,7 +184,6 @@ function App() {
           </Button>
         </Modal.Footer>
       </Modal>
-      
     </main>
   );
 }
