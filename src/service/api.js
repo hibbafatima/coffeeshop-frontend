@@ -59,3 +59,18 @@ export const fetchOrderDetails = async (user_id, order_id) => {
   const data = await response.json();
   return data;
 };
+
+export const queueOrderNotification = async (user_id, order_id) => {
+  try {
+    const response = await fetch(`${API_URL}/users/${user_id}/orders/${order_id}/send_notification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ delay: 120 }),
+    });
+  } catch (error) {
+    console.error('Notification API error:', error);
+    throw error;
+  }
+};

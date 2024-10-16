@@ -1,5 +1,5 @@
 import './App.css';
-import { fetchItems, saveOrder, createUser, fetchLocations, API_URL } from './service/api';
+import { fetchItems, saveOrder, createUser, fetchLocations } from './service/api';
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -33,7 +33,12 @@ function App() {
   }, [order]);
 
   const addToOrder = (item) => {
-    setOrder((prevOrder) => [...prevOrder, item]);
+    const quantity = itemCounters[item.id] || 0;
+    if (quantity > 0) {
+      setOrder((prevOrder) => [...prevOrder, { item, quantity }]);
+    } else {
+      alert("Please select a valid quantity");
+    }
   };
 
   useEffect(() => {
@@ -49,15 +54,26 @@ function App() {
     getLocations();
   }, []);
 
-  const handleCompleteOrder = async () => {
-    const orderToSend = { user_id: user.id, order_items: order.map(item => item.id) };
-    const createdOrder = await saveOrder(orderToSend); 
-    setOrder([]);
-    localStorage.removeItem('order');
-    navigate(`/users/${user.id}/orders/${createdOrder.id}`);;
+  const handleCreateOrder = async () => {
+    const orderToSend = {
+      user_id: user.id,
+      order_items: order.map(orderItem => ({
+        item_id: orderItem.item.id,
+        quantity: orderItem.quantity
+      }))
+    };
+  
+    try {
+      const createdOrder = await saveOrder(orderToSend); 
+      setOrder([]);
+      localStorage.removeItem('order');
+      navigate(`/users/${user.id}/orders/${createdOrder.id}`);
+    } catch (error) {
+      console.error('Error saving order:', error);
+    }
   };
 
-  const handleSave = async () => {
+  const handleCreateUser = async () => {
     if (!name || !email || !selectedLocation) {
       alert("Oops! Looks like you missed something. Please fill out all fields.");
       return;
@@ -101,7 +117,7 @@ function App() {
             <h1 className="title fw-bolder">Hi, {user ? user.name : 'Guest'}</h1>
             <h3 className="title fw-bolder">What will you have today...?</h3>
           </div>
-          <Button variant="warning" onClick={handleCompleteOrder}>Complete Order</Button>
+          <Button variant="warning" onClick={handleCreateOrder}>Complete Order</Button>
         </Container>
       </section>
 
@@ -179,7 +195,7 @@ function App() {
           </select>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" onClick={handleSave}>
+          <Button variant="primary" onClick={handleCreateUser}>
             Save
           </Button>
         </Modal.Footer>
